@@ -35,12 +35,11 @@ Function ConvertTo-ManifestsUsers {
     $objTree = ConvertFrom-Json -InputObject $JSONString
     
     $objTree | % {
-      $userManifest = @"
-user { '$($_.Name)':
-  ensure => 'present',
-  comment => '$($_.Fullname)',
-}
-"@    
+      $userManifest = "" + `
+        "user { '$($_.Name)':" + `
+        "  ensure => 'present'," + `
+        "  comment => '$($_.Fullname)'," + `
+        "}"
       # If the SID ends in -500 or -501 it's the Admin and Guest User.
       # Comment these out as they shouldn't be enforced by Puppet
       if ($_.SID.EndsWith('-500')) {
