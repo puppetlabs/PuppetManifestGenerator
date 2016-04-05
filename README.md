@@ -1,7 +1,7 @@
 # Windows-Blueprinter
 A Blueprint style powershell module for Puppet - Windows Hackday 2016
 
-![Image of Puppet Blueprint](http://www.cygnus-x1.net/links/lcars/blueprints/star-trek-blueprint-collection/star-trek-blueprint-collection-1-s.jpg)
+![Image of Puppet Blueprint](https://raw.githubusercontent.com/puppetlabs/PuppetManifestGenerator/master/img/enterprise.png?token=ABag6TLdnllNIvTnyD1aFeZ38IxOfId7ks5XDVc4wA%3D%3D)
 
 ## Overview
 The goal of the project is to show proof of concept for discovering what can be managed on a user's Windows machine. We will demonstrate the following workflow:
