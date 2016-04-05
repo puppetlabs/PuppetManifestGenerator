@@ -6,3 +6,5 @@ packaging/working/*
 packaging/*.nupkg
 **/nuget.exe
 
+.vagrant
+Vagrantfile
