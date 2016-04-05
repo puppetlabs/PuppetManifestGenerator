@@ -22,12 +22,15 @@ Function Invoke-PuppetGenerator
   # slurp modules
   Write-Verbose "Installed path: $($PSScriptRoot)"
   $ModulePath = $PSScriptRoot
+  $Path = (Join-Path $PSScriptRoot "output")
 
-  [IO.FileInfo]$module = Join-Path $ModulePath "resources\users\users.psm1"
+  [IO.FileInfo]$module = Join-Path $ModulePath "resources\users\users.ps1"
+  [IO.FileInfo]$manifestModule = Join-Path $ModulePath "resources\users\ConvertTo-ManifestsUsers.ps1"
+  
   [string]$content = Get-Content -Path $module -Encoding UTF8
   $code = @"
   New-Module -ScriptBlock {$($content)} -Name $($module.BaseName) | Import-Module;
-  Get-$($module.BaseName);
+  $($module.BaseName);
 "@
    $sb =[ScriptBlock]::Create($code)
   
@@ -40,9 +43,16 @@ Function Invoke-PuppetGenerator
     ThrottleLimit = 10
     ScriptBlock   = $sb
   }
-  Invoke-Command @CommandInfo
+  $info = Invoke-Command @CommandInfo
   
   # format manifest
+  if(-not(Test-path $Path)){ mkdir $path }
+  
+  $outputFile = (Join-Path $Path "$($module.BaseName).json")
+  $info | ConvertTo-JSON -Depth 10 | Out-File -Force -FilePath $outputFile
+  
+  . $manifestModule
+  [string](Get-Content $outputFile) | ConvertTo-ManifestsUsers
 }
 
 Export-ModuleMember -Function *

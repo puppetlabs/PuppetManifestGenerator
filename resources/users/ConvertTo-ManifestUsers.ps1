@@ -25,10 +25,10 @@ Function ConvertTo-ManifestUsers {
       # If the SID ends in -500 or -501 it's the Admin and Guest User.
       # Comment these out as they shouldn't be enforced by Puppet
       if ($_.SID.EndsWith('-500')) {
-        $userManifest = "# This is the local Administrator Account`n# " + $userManifest.Replace("`n","`n# ")
+        $userManifest = "# This is the local Administrator Account. This should not be managed by puppet`n# " + $userManifest.Replace("`n","`n# ")
       }
       if ($_.SID.EndsWith('-501')) {
-        $userManifest = "# This is the local Guest Account`n# " + $userManifest.Replace("`n","`n# ")
+        $userManifest = "# This is the local Guest Account. This should not be managed by puppet`n# " + $userManifest.Replace("`n","`n# ")
       }
 
       $manifest += "`n$userManifest`n"
