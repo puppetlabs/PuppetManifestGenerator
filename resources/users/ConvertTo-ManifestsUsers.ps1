@@ -1,17 +1,3 @@
-Function Get-Users {
-  [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
-  param()
-  
-  Begin { }
-
-  Process {
-    Get-WMIObject -Class "Win32_UserAccount" -Filter "LocalAccount=True" | `
-      Select AccountType,Caption,Domain,SID,FullName,Name
-  }
-
-  End { }
-}
-
 Function ConvertTo-ManifestsUsers {
   [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
   param(
@@ -25,11 +11,7 @@ Function ConvertTo-ManifestsUsers {
 # SID         : S-1-5-21-2403692303-2757309524-139230436-500
 # FullName    :
 # Name        : Administrator  
-  
-  
-  Begin {
-    
-  }
+
   Process {
     $manifest = ""
     $objTree = ConvertFrom-Json -InputObject $JSONString
@@ -53,8 +35,5 @@ Function ConvertTo-ManifestsUsers {
     }
     
     Write-Output $manifest
-  }
-  End {
-    
   }
 }
