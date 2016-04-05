@@ -23,6 +23,10 @@ Function Invoke-PuppetGenerator
   Write-Verbose "Installed path: $($PSScriptRoot)"
   $ModulePath = $PSScriptRoot
 
+  [IO.FileInfo]$module = Join-Path $ModulePath "resources\users\users.psm1"
+  $content = Get-Content -Path $module
+  $code = [ScriptBlock]::create("New-Module -ScriptBlock {$($content); Get-$($module.BaseName)} -ReturnResult;")
+  
   # create pssession
   $sessions = New-PSSession @ConnectionInfo
   
@@ -30,7 +34,7 @@ Function Invoke-PuppetGenerator
   $CommandInfo = @{
     Session       = $sessions
     ThrottleLimit = 10
-    ScriptBlock   = { gwmi win32_bios }
+    ScriptBlock   = $code
   }
   Invoke-Command @CommandInfo
   
