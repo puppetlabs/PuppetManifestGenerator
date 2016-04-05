@@ -4,6 +4,6 @@ Function Get-Users {
 
   Process {
     Get-WMIObject -Class "Win32_UserAccount" -Filter "LocalAccount=True" | `
-      Select AccountType,Caption,Domain,SID,FullName,Name
+      Select AccountType,Caption,Domain,SID,FullName,Name,Description
   }
 }

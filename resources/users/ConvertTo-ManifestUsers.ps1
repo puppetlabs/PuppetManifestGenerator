@@ -1,4 +1,4 @@
-Function ConvertTo-ManifestsUsers {
+Function ConvertTo-ManifestUsers {
   [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
   param(
     [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
@@ -18,9 +18,9 @@ Function ConvertTo-ManifestsUsers {
     
     $objTree | % {
       $userManifest = "" + `
-        "user { '$($_.Name)':" + `
-        "  ensure => 'present'," + `
-        "  comment => '$($_.Fullname)'," + `
+        "user { '$($_.Name)':`n" + `
+        "  ensure => 'present',`n" + `
+        "  comment => '$($_.Description)',`n" + `
         "}"
       # If the SID ends in -500 or -501 it's the Admin and Guest User.
       # Comment these out as they shouldn't be enforced by Puppet
