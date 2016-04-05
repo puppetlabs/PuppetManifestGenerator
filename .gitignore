@@ -8,3 +8,5 @@ packaging/*.nupkg
 
 .vagrant
 Vagrantfile
+
+temp/*
