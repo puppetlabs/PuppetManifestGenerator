@@ -24,8 +24,12 @@ Function Invoke-PuppetGenerator
   $ModulePath = $PSScriptRoot
 
   [IO.FileInfo]$module = Join-Path $ModulePath "resources\users\users.psm1"
-  $content = Get-Content -Path $module
-  $code = [ScriptBlock]::create("New-Module -ScriptBlock {$($content); Get-$($module.BaseName)} -ReturnResult;")
+  [string]$content = Get-Content -Path $module -Encoding UTF8
+  $code = @"
+  New-Module -ScriptBlock {$($content)} -Name $($module.BaseName) | Import-Module;
+  Get-$($module.BaseName);
+"@
+   $sb =[ScriptBlock]::Create($code)
   
   # create pssession
   $sessions = New-PSSession @ConnectionInfo
@@ -34,7 +38,7 @@ Function Invoke-PuppetGenerator
   $CommandInfo = @{
     Session       = $sessions
     ThrottleLimit = 10
-    ScriptBlock   = $code
+    ScriptBlock   = $sb
   }
   Invoke-Command @CommandInfo
   
