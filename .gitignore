@@ -10,3 +10,4 @@ packaging/*.nupkg
 Vagrantfile
 
 temp/*
+output
