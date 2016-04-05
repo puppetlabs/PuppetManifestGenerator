@@ -1,0 +1,8 @@
+Thumbs.db
+Desktop.INI
+
+packaging/working/*
+packaging/*.nupkg
+**/nuget.exe
+
+blueprints/*
