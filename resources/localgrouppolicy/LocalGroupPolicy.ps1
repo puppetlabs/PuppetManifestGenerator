@@ -739,7 +739,7 @@ namespace TJX.PolFileEditor
                      
             #$objEntry | Select *
             $props.PolicyContext = $PolicyType
-            $props.ValueType = $objEntry.Type
+            $props.ValueType = $objEntry.Type.ToString()
             $props.KeyName = $objEntry.KeyName
             $props.ValueName = $objEntry.ValueName
             
