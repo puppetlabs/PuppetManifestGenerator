@@ -17,10 +17,10 @@ Function Invoke-PuppetGenerator
   if(-not(Test-path $manifestFilePath)){ mkdir $manifestFilePath }
 
   Write-Verbose "Creating connections to target nodes"
-  $connectionInfo = @{
-    ComputerName = $ComputerName
-    Credential   = $Credential
-  }
+  $connectionInfo = $PSBoundParameters
+  $connectionInfo.Remove('ModulePath') | Out-Null
+  $connectionInfo.Remove('OutPutPath') | Out-Null
+
   $sessions = New-PSSession @connectionInfo
 
   Write-Verbose "Adding modules to discover"
