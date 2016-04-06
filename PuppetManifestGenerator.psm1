@@ -31,6 +31,9 @@ Function Invoke-PuppetGenerator
 
     $sb = New-ScriptCommand -Name $moduleFile.BaseName -Content $content
 
+    # Determine if PS Remoting is enabled. If it is not and we are just
+    # targeting localhost, use a backup method to grab the data.
+
     $CommandInfo = @{
       Session       = $sessions
       ThrottleLimit = 10
