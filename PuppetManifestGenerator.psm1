@@ -32,12 +32,16 @@ Function Invoke-PuppetGenerator
     [IO.FileInfo]$moduleFile = Join-Path $_.FullName "$($_.Name).ps1"
     [IO.FileInfo]$moduleManifest = Join-Path $_.FullName "ConvertTo-Manifest$($_.Name).ps1"
     
+    if (-not (Test-path $moduleFile)){
+    }else{
+    
     $outputFile = (Join-Path $Path "$($moduleFile.BaseName).json")
     if(-not(Test-path $Path)){
       mkdir $path
     }
 
-    [string]$content = Get-Content -Path $moduleFile.fullname -Encoding UTF8
+    #[string]$content = Get-Content -Path $moduleFile.fullname -Encoding UTF8
+    [string]$content = [IO.File]::ReadAllText($moduleFile.fullname)
     $code = @"
 New-Module -ScriptBlock {$($content)} -Name $($moduleFile.BaseName) | Import-Module;
 $($moduleFile.BaseName);
@@ -59,11 +63,13 @@ $($moduleFile.BaseName);
     $info | ConvertTo-JSON -Depth 10 | Out-File -Force -FilePath $outputFile
     
     . $moduleManifest.fullname
-    $jsonString = [string](Get-Content $outputFile)
-    &"$($moduleManifest.BaseName) -jsonString $($jsonString)"
+    $jsonString = [string]( [IO.File]::ReadAllText( $outputFile))
+    if($jsonString){
+      &"$($moduleManifest.BaseName)" -jsonString $jsonString
+    }
     
   }
-
+}
 }
 
 Export-ModuleMember -Function Invoke-PuppetGenerator
