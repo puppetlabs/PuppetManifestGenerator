@@ -24,6 +24,7 @@ Function Invoke-PuppetGenerator
   $sessions = New-PSSession @connectionInfo
 
   Write-Verbose "Adding modules to discover"
+
   Get-ChildItem -Path $ModulePath -Directory | % {
 
     [IO.FileInfo]$moduleFile     = Join-Path $_.FullName "$($_.Name).ps1"
@@ -52,6 +53,7 @@ Function Invoke-PuppetGenerator
         moduleName   = $moduleFile.BaseName
         OutPutPath   = $jsonFilePath
       }
+
       Write-Verbose "Exporting $($moduleFile.BaseName) info from $($computername) to json"
       $outputFile = New-JSONOutputFile @jsonParams
       $jsonString = [string]([IO.File]::ReadAllText($outputFile))
@@ -74,11 +76,16 @@ Function Invoke-PuppetGenerator
 
 function New-PuppetManifestFile
 {
-  param($ModuleName, [IO.FileInfo]$Module, $jsonString, $OutPutPath)
+  param(
+    $ModuleName,
+    [IO.FileInfo]$Module,
+    $JsonString,
+    $OutputPath
+  )
 
   . $Module.FullName
 
-  $manifestText = &"$($Module.BaseName)" -jsonString $jsonString
+  $manifestText = &"$($Module.BaseName)" -jsonString $JsonString
 
   if ($manifestText -eq $null -or $manifestText -eq '') {
     Write-Warning "Content for $($Module.BaseName) was empty"
@@ -92,9 +99,14 @@ function New-PuppetManifestFile
 
 function New-JSONOutputFile
 {
-  param($info, $computername, $moduleName, $OutPutPath)
+  param(
+    $info,
+    $computername,
+    $moduleName,
+    $OutputPath
+  )
 
-  $outputFile = (Join-Path $OutPutPath "$computername.$($moduleName).json")
+  $outputFile = (Join-Path $OutputPath "$computername.$($moduleName).json")
 
   $info | ConvertTo-JSON -Depth 10 | Out-File -Force -FilePath $outputFile
 
@@ -103,7 +115,11 @@ function New-JSONOutputFile
 
 function New-ScriptCommand
 {
-  param($Name,$content)
+  param(
+    $Name,
+    $content
+  )
+
   [string]$content = [IO.File]::ReadAllText($moduleFile.fullname)
   $code = @"
 New-Module -ScriptBlock {$($content)} -Name $($Name) | Import-Module;
