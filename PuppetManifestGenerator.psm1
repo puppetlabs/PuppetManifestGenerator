@@ -35,7 +35,6 @@ Function Invoke-PuppetGenerator
     if (-not (Test-path $moduleFile)){
     }else{
     
-    $outputFile = (Join-Path $Path "$($moduleFile.BaseName).json")
     if(-not(Test-path $Path)){
       mkdir $path
     }
@@ -46,30 +45,39 @@ Function Invoke-PuppetGenerator
 New-Module -ScriptBlock {$($content)} -Name $($moduleFile.BaseName) | Import-Module;
 $($moduleFile.BaseName);
 "@
-    $sb =[ScriptBlock]::Create($code)
+      $sb =[ScriptBlock]::Create($code)
 
-    # create pssession
-    $sessions = New-PSSession @ConnectionInfo
+      # create pssession
+      $sessions = New-PSSession @ConnectionInfo
 
-    $CommandInfo = @{
-      Session       = $sessions
-      ThrottleLimit = 10
-      ScriptBlock = $sb
+      $CommandInfo = @{
+        Session       = $sessions
+        ThrottleLimit = 10
+        ScriptBlock = $sb
+      }
+      # invoke command
+      $info = Invoke-Command @CommandInfo
+      
+      $info | Group-Object PSComputerName | % {
+        $group = $_.Group | %{
+          $computername = $_.PSComputerName
+        
+          # format manifest
+          $outputFile = (Join-Path $Path "$computername.$($moduleFile.BaseName).json")
+          $info | ConvertTo-JSON -Depth 10 | Out-File -Force -FilePath $outputFile
+          
+          . $moduleManifest.fullname
+          $jsonString = [string]( [IO.File]::ReadAllText( $outputFile))
+          if($jsonString){
+            $manifestText = &"$($moduleManifest.BaseName)" -jsonString $jsonString
+            $outputFile = (Join-Path $Path "$computername.$($moduleFile.BaseName).pp")
+            Out-File -Force -FilePath $outputFile -InputObject $manifestText
+          }
+        }
+        
+      }
     }
-    # invoke command
-    $info = Invoke-Command @CommandInfo
-
-    # format manifest
-    $info | ConvertTo-JSON -Depth 10 | Out-File -Force -FilePath $outputFile
-    
-    . $moduleManifest.fullname
-    $jsonString = [string]( [IO.File]::ReadAllText( $outputFile))
-    if($jsonString){
-      &"$($moduleManifest.BaseName)" -jsonString $jsonString
-    }
-    
   }
-}
 }
 
 Export-ModuleMember -Function Invoke-PuppetGenerator
