@@ -20,11 +20,13 @@ Function Get-Environment {
         "WINDIR" {}
         # Export these
         default {
-          $rv = 1 | Select-Object -Property Name, Type, Value
-          $rv.Name = $name
-          $rv.Type = $key.GetValueKind($name).ToString()
-          $rv.Value = $key.GetValue($name,$null,'DoNotExpandEnvironmentNames')
-          $rv
+          $props = @{
+            'Name' = $name
+            'Type' = $key.GetValueKind($name).ToString()
+            'Value' = $key.GetValue($name,$null,'DoNotExpandEnvironmentNames').ToString()
+          }
+          
+          Write-Output (New-Object -Type PSCustomObject -ArgumentList $props)
         }
       }
     }
