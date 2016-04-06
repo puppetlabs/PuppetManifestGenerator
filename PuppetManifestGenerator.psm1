@@ -2,22 +2,12 @@ Function Invoke-PuppetGenerator
 {
   [CmdletBinding()]
   param(
-    [string[]]$Computers = 'localhost',
-    [PSCredential]$Credentials,
+    [string[]]$ComputerName = 'localhost',
+    [AllowNull()]
+    [PSCredential]$Credential = $null,
     [string]$ModulePath = (Join-Path $PSScriptRoot "resources"),
     [string]$OutPutPath = (Join-Path $PSScriptRoot "output")
   )
-
-  $ConnectionInfo = $PsBoundParameters
-  $ConnectionInfo.Remove('Path') | Out-Null
-  $ConnectionInfo['ErrorAction'] = 'SilentlyContinue'
-  $ConnectionInfo['ErrorVariable'] = 'connectionErrors'
-
-  $ManifestInfo = $PsBoundParameters
-  $ManifestInfo.Remove('Computers') | Out-Null
-  $ManifestInfo.Remove('Credentials') | Out-Null
-  $ManifestInfo.Remove('ModulePath') | Out-Null
-  $ManifestInfo.Remove('Path') | Out-Null
 
   $jsonFilePath = Join-Path $OutPutPath "json"
   $manifestFilePath = Join-Path $OutPutPath "manifest"
@@ -26,10 +16,14 @@ Function Invoke-PuppetGenerator
   if(-not(Test-path $jsonFilePath)){ mkdir $jsonFilePath }
   if(-not(Test-path $manifestFilePath)){ mkdir $manifestFilePath }
 
-  # create pssession
-  $sessions = New-PSSession @ConnectionInfo
+  Write-Verbose "Creating connections to target nodes"
+  $connectionInfo = @{
+    ComputerName = $ComputerName
+    Credential   = $Credential
+  }
+  $sessions = New-PSSession @connectionInfo
 
-  # slurp modules
+  Write-Verbose "Adding modules to discover"
   Get-ChildItem -Path $ModulePath -Directory | % {
 
     [IO.FileInfo]$moduleFile     = Join-Path $_.FullName "$($_.Name).ps1"
@@ -43,36 +37,36 @@ Function Invoke-PuppetGenerator
       ScriptBlock   = $sb
     }
 
+    Write-Verbose "Executing $($moduleFile.BaseName) on target nodes"
     $info = Invoke-Command @CommandInfo
 
     $info | Group-Object PSComputerName | % {
-      $group = $_.Group | %{
-        $computername = $_.PSComputerName
+      $computername = $_.Name
+      $groupInfo = $_.Group
+      $jsonParams = @{
+        info         = $groupInfo
+        computername = $computername
+        moduleName   = $moduleFile.BaseName
+        OutPutPath   = $jsonFilePath
+      }
+      Write-Verbose "Exporting $($moduleFile.BaseName) info from $($computername) to json"
+      $outputFile = New-JSONOutputFile @jsonParams
+      $jsonString = [string]([IO.File]::ReadAllText($outputFile))
 
-        $jsonParams = @{
-          info         = $info
-          computername = $computername
-          moduleName   = $moduleFile.BaseName
-          OutPutPath   = $jsonFilePath
+      if($jsonString){
+        $manifestParams = @{
+          ModuleName = $moduleFile.BaseName
+          Module     = $moduleManifest
+          jsonString = $jsonString
+          OutPutPath = $manifestFilePath
         }
-        $outputFile = New-JSONOutputFile @jsonParams
-
-        $jsonString = [string]([IO.File]::ReadAllText($outputFile))
-
-        if($jsonString){
-          $manifestParams = @{
-            ModuleName = $moduleFile.BaseName
-            Module     = $moduleManifest
-            jsonString = $jsonString
-            OutPutPath = $manifestFilePath
-          }
-          New-PuppetManifestFile @manifestParams
-        }
-
+        Write-Verbose "Parsing $($moduleFile.BaseName) info from $($computername) to Puppet manifest"
+        New-PuppetManifestFile @manifestParams
       }
     }
-
   }
+
+  $sessions | Remove-PSSession
 }
 
 function New-PuppetManifestFile
