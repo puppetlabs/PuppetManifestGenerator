@@ -10,7 +10,7 @@ Function Get-Groups {
         'Description' = $_.Description
       }
       
-      # TODO Get members of group and append to object
+      # This is a bit hacky but, meh.
       $members = (NET LOCALGROUP "$($_.Name)" | 
         where {$_ -AND $_ -notmatch "command completed successfully"} | 
         select -skip 4)
