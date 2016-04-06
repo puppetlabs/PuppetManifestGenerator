@@ -77,7 +77,12 @@ function New-PuppetManifestFile
 
   $manifestText = &"$($Module.BaseName)" -jsonString $jsonString
 
-  $outputFile = (Join-Path $OutPutPath "$computername.$($moduleName).pp")
+  if ($manifestText -eq $null -or $manifestText -eq '') {
+    Write-Warning "Content for $($Module.BaseName) was empty"
+    return
+  }
+
+  $outputFile = (Join-Path $OutputPath "$computername.$($moduleName).pp")
 
   Out-File -Force -FilePath $outputFile -InputObject $manifestText
 }
