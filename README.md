@@ -20,6 +20,9 @@ The plan of record is to discover and model the following 4 types of resources:
 ## Background
 Windows users face a steep learning curve in understanding how to use Puppet. Using familiar Windows tools to discover the resources that can be managed and showing the user how to represent these resources with Puppet makes this on-ramp less daunting.
 
+For more details on the project:
+https://docs.google.com/document/d/1ix4fwg3yi2z4BUV5EQ2wPhVyeiyZMm2VoCJIxwRZpC0/edit
+
 ## Assumptions
 - Client machine runs Powershell v3+
 - Target server machine runs Powershell v2+
