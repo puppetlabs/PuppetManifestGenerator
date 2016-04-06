@@ -94,7 +94,9 @@ function New-PuppetManifestFile
 
   $outputFile = (Join-Path $OutputPath "$computername.$($moduleName).pp")
 
-  Out-File -Force -FilePath $outputFile -InputObject $manifestText
+  $utf8EncodingWithoutBom = New-Object System.Text.UTF8Encoding($false)
+  if (Test-Path($outputFile)) { Remove-Item $outputFile -Force }
+  [System.IO.File]::WriteAllLines($outputFile, $manifestText, $utf8EncodingWithoutBom)
 }
 
 function New-JSONOutputFile
