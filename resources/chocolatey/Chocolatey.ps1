@@ -7,10 +7,13 @@ Function Get-Chocolatey {
     # Chocolatey isn't installed
     if ($chocoInstall -eq $null) { Write-Verbose "Chocolatey isn't installed"; return $null }
 
-    $pkgList = (& Choco.exe list -lo | 
-      ? { $_ -and $_ -notmatch "packages installed" }
-    )
-    
+    $pkgList = (& choco.exe list -lo -r | %{
+      @{
+        Name = $_.Split('|')[0]
+        Version= $_.Split('|')[1]
+      }
+    })
+
     $props = @{
       'ChocolateyInstall' = $chocoInstall
       'Packages' = $pkgList

@@ -28,8 +28,10 @@ class {'chocolatey':
     if ($objTree.Packages -ne $null) {
       $objTree.Packages | % {
         $thisManifest = @"
-package { '$($_)':
+package { '$($_.Name)':
   ensure   => 'installed',
+  #ensure  => 'latest',
+  #ensure  => '$_.Version',
   provider => 'chocolatey',
 }
 "@
