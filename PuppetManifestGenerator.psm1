@@ -13,8 +13,10 @@ Function Invoke-PuppetGenerator
   $manifestFilePath = Join-Path $OutPutPath "manifest"
 
   if(-not(Test-path $OutPutPath)){ mkdir $OutPutPath }
-  if(-not(Test-path $jsonFilePath)){ mkdir $jsonFilePath }
-  if(-not(Test-path $manifestFilePath)){ mkdir $manifestFilePath }
+  if (Test-Path($jsonFilePath)) { Remove-Item $jsonFilePath -Force -Recurse -EA SilentlyContinue }
+  if(-not(Test-path $jsonFilePath)){ mkdir $jsonFilePath | Out-Null }
+  if (Test-Path($manifestFilePath)) { Remove-Item $manifestFilePath -Force -Recurse -EA SilentlyContinue }
+  if(-not(Test-path $manifestFilePath)){ mkdir $manifestFilePath | Out-Null }
 
   Write-Verbose "Creating connections to target nodes"
   $connectionInfo = $PSBoundParameters
