@@ -23,7 +23,13 @@ Function Invoke-PuppetGenerator
   $connectionInfo.Remove('ModulePath') | Out-Null
   $connectionInfo.Remove('OutPutPath') | Out-Null
 
-  $sessions = New-PSSession @connectionInfo
+  try {
+    $sessions = New-PSSession @connectionInfo -ErrorAction Stop
+  } catch {
+     Write-Warning "Ensure you have PowerShell Remoting enabled on all computers. You can do that by running Enable-PSRemoting -Force."
+     Write-Error $_
+     return
+  }
 
   Write-Verbose "Adding modules to discover"
 
