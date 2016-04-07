@@ -1,5 +1,5 @@
 Function Get-Chocolatey {
-  [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
+  [CmdletBinding(SupportsShouldProcess=$false, ConfirmImpact='Low')]
   param()
 
   Process {
@@ -15,7 +15,7 @@ Function Get-Chocolatey {
       'ChocolateyInstall' = $chocoInstall
       'Packages' = $pkgList
     }
-    
+
     Write-Output (New-Object -Type PSCustomObject -ArgumentList $props)
   }
 }

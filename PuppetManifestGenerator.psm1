@@ -32,16 +32,12 @@ Function Invoke-PuppetGenerator
   }
 
   Write-Verbose "Adding modules to discover"
-
   Get-ChildItem -Path $ModulePath -Directory | % {
 
     [IO.FileInfo]$moduleFile     = Join-Path $_.FullName "$($_.Name).ps1"
     [IO.FileInfo]$moduleManifest = Join-Path $_.FullName "ConvertTo-Manifest$($_.Name).ps1"
 
     $sb = New-ScriptCommand -Name $moduleFile.BaseName -Content $content
-
-    # Determine if PS Remoting is enabled. If it is not and we are just
-    # targeting localhost, use a backup method to grab the data.
 
     $CommandInfo = @{
       Session       = $sessions
@@ -73,6 +69,7 @@ Function Invoke-PuppetGenerator
           jsonString = $jsonString
           OutPutPath = $manifestFilePath
         }
+
         Write-Verbose "Parsing $($moduleFile.BaseName) info from $($computername) to Puppet manifest"
         New-PuppetManifestFile @manifestParams
       }
