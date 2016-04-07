@@ -112,10 +112,10 @@ function New-JSONOutputFile
     $info,
     $computername,
     $moduleName,
-    $OutputPath
+    $outputPath
   )
 
-  $outputFile = (Join-Path $OutputPath "$computername.$($moduleName).json")
+  $outputFile = (Join-Path $outputPath "$computername.$($moduleName).json")
 
   $info | ConvertTo-JSON -Depth 10 | Out-File -Force -FilePath $outputFile
 
