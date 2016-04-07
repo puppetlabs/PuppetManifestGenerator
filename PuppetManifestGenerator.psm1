@@ -30,7 +30,6 @@ Function Invoke-PuppetGenerator
      Write-Error $_
      return
   }
-
   Write-Verbose "Adding modules to discover"
   Get-ChildItem -Path $ModulePath -Directory | % {
 
