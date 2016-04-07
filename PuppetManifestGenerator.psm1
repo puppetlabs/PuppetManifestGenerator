@@ -74,6 +74,8 @@ Function Invoke-PuppetGenerator
   }
 
   $sessions | Remove-PSSession
+
+  Write-Output "Manifests are located at '$manifestFilePath'"
 }
 
 function New-PuppetManifestFile
