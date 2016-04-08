@@ -131,7 +131,7 @@ function New-ScriptCommand
   [string]$content = [IO.File]::ReadAllText($moduleFile.fullname)
   $code = @"
 New-Module -ScriptBlock {$($content)} -Name $($Name) | Import-Module;
-$($Name);
+Get-$($Name);
 "@
   $sb = [ScriptBlock]::Create($code)
   $sb
