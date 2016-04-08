@@ -11,3 +11,4 @@ Vagrantfile
 
 temp/*
 output
+.vscode
