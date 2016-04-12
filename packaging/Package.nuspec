@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata>
+    <id>puppetmanifestgenerator</id>
+    <version>0.0.1</version>
+    <title>Puppet Manifest Generator</title>
+    <authors>Puppet</authors>
+    <owners>Puppet (formerly PuppetLabs)</owners>
+    <projectUrl>https://github.com/puppetlabs/PuppetManifestGenerator</projectUrl>
+    <iconUrl>https://puppet.com/sites/default/files/favicon.ico</iconUrl>
+    <licenseUrl>https://github.com/puppetlabs/PuppetManifestGenerator/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A powershell module to query Windows servers and generate Puppet manifests based on the discovery</description>
+    <tags>powershell puppet puppetlabs manifest</tags>
+    <dependencies />
+    <releaseNotes></releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
