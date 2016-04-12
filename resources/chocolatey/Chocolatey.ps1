@@ -1,5 +1,5 @@
 Function Get-Chocolatey {
-  [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
+  [CmdletBinding(SupportsShouldProcess=$false, ConfirmImpact='Low')]
   param()
 
   Process {
@@ -7,15 +7,18 @@ Function Get-Chocolatey {
     # Chocolatey isn't installed
     if ($chocoInstall -eq $null) { Write-Verbose "Chocolatey isn't installed"; return $null }
 
-    $pkgList = (& Choco.exe list -lo | 
-      ? { $_ -and $_ -notmatch "packages installed" }
-    )
-    
+    $pkgList = (& choco.exe list -lo -r | %{
+      @{
+        Name = $_.Split('|')[0]
+        Version= $_.Split('|')[1]
+      }
+    })
+
     $props = @{
       'ChocolateyInstall' = $chocoInstall
       'Packages' = $pkgList
     }
-    
+
     Write-Output (New-Object -Type PSCustomObject -ArgumentList $props)
   }
 }

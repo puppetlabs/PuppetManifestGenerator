@@ -1,5 +1,31 @@
 Function Invoke-PuppetGenerator
 {
+<#
+.EXAMPLE
+PS> Invoke-PuppetGenerator -Verbose
+VERBOSE: Creating connections to target nodes
+VERBOSE: Adding modules to discover
+VERBOSE: Executing chocolatey on target nodes
+VERBOSE: Executing environment on target nodes
+VERBOSE: [localhost] Exporting environment info to json
+WARNING: [localhost] Failed to convert data in environment to JSON
+VERBOSE: Executing groups on target nodes
+VERBOSE: [localhost] Exporting groups info to json
+VERBOSE: [localhost] Parsing groups info to Puppet manifest
+VERBOSE: Executing iis on target nodes
+VERBOSE: Executing localgrouppolicy on target nodes
+VERBOSE: [localhost] Exporting localgrouppolicy info to json
+VERBOSE: [localhost] Parsing localgrouppolicy info to Puppet manifest
+VERBOSE: Executing services on target nodes
+VERBOSE: [localhost] Exporting services info to json
+VERBOSE: [localhost] Parsing services info to Puppet manifest
+VERBOSE: Executing users on target nodes
+VERBOSE: [localhost] Exporting users info to json
+VERBOSE: [localhost] Parsing users info to Puppet manifest
+VERBOSE: Executing windowsfeatures on target nodes
+VERBOSE: [localhost] Exporting windowsfeatures info to json
+VERBOSE: [localhost] Parsing windowsfeatures info to Puppet manifest
+#>
   [CmdletBinding()]
   param(
     [string[]]$ComputerName = 'localhost',
@@ -13,18 +39,22 @@ Function Invoke-PuppetGenerator
   $manifestFilePath = Join-Path $OutPutPath "manifest"
 
   if(-not(Test-path $OutPutPath)){ mkdir $OutPutPath }
-  if(-not(Test-path $jsonFilePath)){ mkdir $jsonFilePath }
-  if(-not(Test-path $manifestFilePath)){ mkdir $manifestFilePath }
+  if (Test-Path($jsonFilePath)) { Remove-Item $jsonFilePath -Force -Recurse -EA SilentlyContinue }
+  if(-not(Test-path $jsonFilePath)){ mkdir $jsonFilePath | Out-Null }
+  if (Test-Path($manifestFilePath)) { Remove-Item $manifestFilePath -Force -Recurse -EA SilentlyContinue }
+  if(-not(Test-path $manifestFilePath)){ mkdir $manifestFilePath | Out-Null }
 
   Write-Verbose "Creating connections to target nodes"
   $connectionInfo = $PSBoundParameters
   $connectionInfo.Remove('ModulePath') | Out-Null
   $connectionInfo.Remove('OutPutPath') | Out-Null
+  $connectionInfo.ErrorAction = 'SilentlyContinue'
+  $connectionInfo.ErrorVariable = '+connectionErrors'
 
+  # TODO: Write our computers not connected to
   $sessions = New-PSSession @connectionInfo
 
   Write-Verbose "Adding modules to discover"
-
   Get-ChildItem -Path $ModulePath -Directory | % {
 
     [IO.FileInfo]$moduleFile     = Join-Path $_.FullName "$($_.Name).ps1"
@@ -32,13 +62,12 @@ Function Invoke-PuppetGenerator
 
     $sb = New-ScriptCommand -Name $moduleFile.BaseName -Content $content
 
-    # Determine if PS Remoting is enabled. If it is not and we are just
-    # targeting localhost, use a backup method to grab the data.
-
     $CommandInfo = @{
       Session       = $sessions
-      ThrottleLimit = 10
+      ThrottleLimit = 100
       ScriptBlock   = $sb
+      ErrorAction   = 'SilentlyContinue'
+      ErrorVariable = '+commandErrors'
     }
 
     Write-Verbose "Executing $($moduleFile.BaseName) on target nodes"
@@ -46,32 +75,38 @@ Function Invoke-PuppetGenerator
 
     $info | Group-Object PSComputerName | % {
       $computername = $_.Name
-      $groupInfo = $_.Group
-      $jsonParams = @{
+      $groupInfo    = $_.Group
+      $jsonParams   = @{
         info         = $groupInfo
         computername = $computername
         moduleName   = $moduleFile.BaseName
         OutPutPath   = $jsonFilePath
       }
 
-      Write-Verbose "Exporting $($moduleFile.BaseName) info from $($computername) to json"
+      Write-Verbose "[$computername] Exporting $($moduleFile.BaseName) info to json"
       $outputFile = New-JSONOutputFile @jsonParams
-      $jsonString = [string]([IO.File]::ReadAllText($outputFile))
+      if($outputFile){
+        $jsonString = [string]([IO.File]::ReadAllText($outputFile))
+      }
 
       if($jsonString){
         $manifestParams = @{
-          ModuleName = $moduleFile.BaseName
-          Module     = $moduleManifest
-          jsonString = $jsonString
-          OutPutPath = $manifestFilePath
+          ModuleName   = $moduleFile.BaseName
+          Module       = $moduleManifest
+          jsonString   = $jsonString
+          OutPutPath   = $manifestFilePath
+          ComputerName = $computername
         }
-        Write-Verbose "Parsing $($moduleFile.BaseName) info from $($computername) to Puppet manifest"
+
+        Write-Verbose "[$computername] Parsing $($moduleFile.BaseName) info to Puppet manifest"
         New-PuppetManifestFile @manifestParams
       }
     }
   }
 
   $sessions | Remove-PSSession
+
+  Write-Output "Manifests are located at '$manifestFilePath'"
 }
 
 function New-PuppetManifestFile
@@ -80,7 +115,8 @@ function New-PuppetManifestFile
     $ModuleName,
     [IO.FileInfo]$Module,
     $JsonString,
-    $OutputPath
+    $OutputPath,
+    $computername
   )
 
   . $Module.FullName
@@ -88,7 +124,7 @@ function New-PuppetManifestFile
   $manifestText = &"$($Module.BaseName)" -jsonString $JsonString
 
   if ($manifestText -eq $null -or $manifestText -eq '') {
-    Write-Warning "Content for $($Module.BaseName) was empty"
+    Write-Warning "[$computername] Content for $($Module.BaseName) was empty"
     return
   }
 
@@ -105,14 +141,21 @@ function New-JSONOutputFile
     $info,
     $computername,
     $moduleName,
-    $OutputPath
+    $outputPath
   )
 
-  $outputFile = (Join-Path $OutputPath "$computername.$($moduleName).json")
+  try{
+    $outputFile = (Join-Path $outputPath "$computername.$($moduleName).json")
+    if (Test-Path($outputFile)) { Remove-Item $outputFile -Force }
 
-  $info | ConvertTo-JSON -Depth 10 | Out-File -Force -FilePath $outputFile
+    $info = $info | ConvertTo-JSON -Depth 10
 
-  $outputFile
+    $info | Out-File -Force -FilePath $outputFile
+
+    $outputFile
+  }catch{
+    Write-Warning "[$computername] Failed to convert data in $ModuleName to JSON"
+  }
 }
 
 function New-ScriptCommand
@@ -125,7 +168,7 @@ function New-ScriptCommand
   [string]$content = [IO.File]::ReadAllText($moduleFile.fullname)
   $code = @"
 New-Module -ScriptBlock {$($content)} -Name $($Name) | Import-Module;
-$($Name);
+Get-$($Name);
 "@
   $sb = [ScriptBlock]::Create($code)
   $sb

@@ -1,10 +1,10 @@
 Function Get-Environment {
-  [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
+  [CmdletBinding(SupportsShouldProcess=$false, ConfirmImpact='Low')]
   param()
 
   Process {
     $regKey = "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-    
+
     $key = Get-Item -Path "Registry::$regKey"
     $key.GetValueNames() | % {
       $name = $_
@@ -23,9 +23,9 @@ Function Get-Environment {
           $props = @{
             'Name' = $name
             'Type' = $key.GetValueKind($name).ToString()
-            'Value' = $key.GetValue($name,$null,'DoNotExpandEnvironmentNames').ToString()
+            'Value' = $key.GetValue($name, $null, 'DoNotExpandEnvironmentNames').ToString()
           }
-          
+
           Write-Output (New-Object -Type PSCustomObject -ArgumentList $props)
         }
       }

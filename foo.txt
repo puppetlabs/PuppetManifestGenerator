@@ -1,0 +1,23 @@
+PS C:\vagrant> Invoke-PuppetGenerator -Verbose
+VERBOSE: Creating connections to target nodes
+VERBOSE: Adding modules to discover
+VERBOSE: Executing chocolatey on target nodes
+VERBOSE: Executing environment on target nodes
+VERBOSE: [localhost] Exporting environment info to json
+WARNING: [localhost] Failed to convert data in environment to JSON
+VERBOSE: Executing groups on target nodes
+VERBOSE: [localhost] Exporting groups info to json
+VERBOSE: [localhost] Parsing groups info to Puppet manifest
+VERBOSE: Executing iis on target nodes
+VERBOSE: Executing localgrouppolicy on target nodes
+VERBOSE: [localhost] Exporting localgrouppolicy info to json
+VERBOSE: [localhost] Parsing localgrouppolicy info to Puppet manifest
+VERBOSE: Executing services on target nodes
+VERBOSE: [localhost] Exporting services info to json
+VERBOSE: [localhost] Parsing services info to Puppet manifest
+VERBOSE: Executing users on target nodes
+VERBOSE: [localhost] Exporting users info to json
+VERBOSE: [localhost] Parsing users info to Puppet manifest
+VERBOSE: Executing windowsfeatures on target nodes
+VERBOSE: [localhost] Exporting windowsfeatures info to json
+VERBOSE: [localhost] Parsing windowsfeatures info to Puppet manifest

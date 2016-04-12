@@ -1,10 +1,10 @@
 Function ConvertTo-ManifestChocolatey {
-  [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
+  [CmdletBinding(SupportsShouldProcess=$false, ConfirmImpact='Low')]
   param(
-    [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
     [string]$JSONString
   )
-  
+
 # {
 #     "ChocolateyInstall":  "C:\\ProgramData\\chocolatey",
 #     "Packages":  [
@@ -28,15 +28,17 @@ class {'chocolatey':
     if ($objTree.Packages -ne $null) {
       $objTree.Packages | % {
         $thisManifest = @"
-package { '$($_)':
+package { '$($_.Name)':
   ensure   => 'installed',
+  #ensure  => 'latest',
+  #ensure  => '$_.Version',
   provider => 'chocolatey',
 }
 "@
-        $manifest += "`n$thisManifest`n"      
+        $manifest += "`n$thisManifest`n"
       }
     }
-        
+
     Write-Output $manifest
   }
 }

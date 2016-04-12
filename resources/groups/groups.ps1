@@ -1,5 +1,5 @@
 Function Get-Groups {
-  [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
+  [CmdletBinding(SupportsShouldProcess=$false, ConfirmImpact='Low')]
   param()
 
   Process {
@@ -9,7 +9,7 @@ Function Get-Groups {
         'Name' = $_.Name
         'Description' = $_.Description
       }
-      
+
       # This is a bit hacky but, meh.
       $members = (NET LOCALGROUP "$($_.Name)" | 
         where {$_ -AND $_ -notmatch "command completed successfully"} | 
