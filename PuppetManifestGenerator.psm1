@@ -22,14 +22,12 @@ Function Invoke-PuppetGenerator
   $connectionInfo = $PSBoundParameters
   $connectionInfo.Remove('ModulePath') | Out-Null
   $connectionInfo.Remove('OutPutPath') | Out-Null
+  $connectionInfo.ErrorAction = 'SilentlyContinue'
+  $connectionInfo.ErrorVariable = '+connectionErrors'
 
-  try {
-    $sessions = New-PSSession @connectionInfo -ErrorAction Stop
-  } catch {
-     Write-Warning "Ensure you have PowerShell Remoting enabled on all computers. You can do that by running Enable-PSRemoting -Force."
-     Write-Error $_
-     return
-  }
+  # TODO: Write our computers not connected to
+  $sessions = New-PSSession @connectionInfo
+
   Write-Verbose "Adding modules to discover"
   Get-ChildItem -Path $ModulePath -Directory | % {
 
@@ -40,8 +38,10 @@ Function Invoke-PuppetGenerator
 
     $CommandInfo = @{
       Session       = $sessions
-      ThrottleLimit = 10
+      ThrottleLimit = 100
       ScriptBlock   = $sb
+      ErrorAction   = 'SilentlyContinue'
+      ErrorVariable = '+commandErrors'
     }
 
     Write-Verbose "Executing $($moduleFile.BaseName) on target nodes"
@@ -49,8 +49,8 @@ Function Invoke-PuppetGenerator
 
     $info | Group-Object PSComputerName | % {
       $computername = $_.Name
-      $groupInfo = $_.Group
-      $jsonParams = @{
+      $groupInfo    = $_.Group
+      $jsonParams   = @{
         info         = $groupInfo
         computername = $computername
         moduleName   = $moduleFile.BaseName
@@ -59,8 +59,8 @@ Function Invoke-PuppetGenerator
 
       Write-Verbose "Exporting $($moduleFile.BaseName) info from $($computername) to json"
       $outputFile = New-JSONOutputFile @jsonParams
-      $jsonString = [string]([IO.File]::ReadAllText($outputFile))
 
+      $jsonString = [string]([IO.File]::ReadAllText($outputFile))
       if($jsonString){
         $manifestParams = @{
           ModuleName = $moduleFile.BaseName
@@ -70,6 +70,7 @@ Function Invoke-PuppetGenerator
         }
 
         Write-Verbose "Parsing $($moduleFile.BaseName) info from $($computername) to Puppet manifest"
+        # TODO: Catch a write exception here
         New-PuppetManifestFile @manifestParams
       }
     }
@@ -114,11 +115,18 @@ function New-JSONOutputFile
     $outputPath
   )
 
-  $outputFile = (Join-Path $outputPath "$computername.$($moduleName).json")
+  try{
+    $outputFile = (Join-Path $outputPath "$computername.$($moduleName).json")
+    if (Test-Path($outputFile)) { Remove-Item $outputFile -Force }
 
-  $info | ConvertTo-JSON -Depth 10 | Out-File -Force -FilePath $outputFile
+    $info = $info | ConvertTo-JSON -Depth 10
 
-  $outputFile
+    $info | Out-File -Force -FilePath $outputFile
+
+    $outputFile
+  }catch{
+    Write-Error "Failed to convert data for $ModuleName to JSON"
+  }
 }
 
 function New-ScriptCommand
