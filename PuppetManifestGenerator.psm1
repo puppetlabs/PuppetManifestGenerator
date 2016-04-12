@@ -57,20 +57,22 @@ Function Invoke-PuppetGenerator
         OutPutPath   = $jsonFilePath
       }
 
-      Write-Verbose "Exporting $($moduleFile.BaseName) info from $($computername) to json"
+      Write-Verbose "[$computername] Exporting $($moduleFile.BaseName) info to json"
       $outputFile = New-JSONOutputFile @jsonParams
+      if($outputFile){
+        $jsonString = [string]([IO.File]::ReadAllText($outputFile))
+      }
 
-      $jsonString = [string]([IO.File]::ReadAllText($outputFile))
       if($jsonString){
         $manifestParams = @{
-          ModuleName = $moduleFile.BaseName
-          Module     = $moduleManifest
-          jsonString = $jsonString
-          OutPutPath = $manifestFilePath
+          ModuleName   = $moduleFile.BaseName
+          Module       = $moduleManifest
+          jsonString   = $jsonString
+          OutPutPath   = $manifestFilePath
+          ComputerName = $computername
         }
 
-        Write-Verbose "Parsing $($moduleFile.BaseName) info from $($computername) to Puppet manifest"
-        # TODO: Catch a write exception here
+        Write-Verbose "[$computername] Parsing $($moduleFile.BaseName) info to Puppet manifest"
         New-PuppetManifestFile @manifestParams
       }
     }
@@ -87,7 +89,8 @@ function New-PuppetManifestFile
     $ModuleName,
     [IO.FileInfo]$Module,
     $JsonString,
-    $OutputPath
+    $OutputPath,
+    $computername
   )
 
   . $Module.FullName
@@ -95,7 +98,7 @@ function New-PuppetManifestFile
   $manifestText = &"$($Module.BaseName)" -jsonString $JsonString
 
   if ($manifestText -eq $null -or $manifestText -eq '') {
-    Write-Warning "Content for $($Module.BaseName) was empty"
+    Write-Warning "[$computername] Content for $($Module.BaseName) was empty"
     return
   }
 
@@ -125,7 +128,7 @@ function New-JSONOutputFile
 
     $outputFile
   }catch{
-    Write-Error "Failed to convert data for $ModuleName to JSON"
+    Write-Warning "[$computername] Failed to convert data in $ModuleName to JSON"
   }
 }
 
