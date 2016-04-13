@@ -12,15 +12,16 @@ The goal of the project is to show proof of concept for discovering what can be 
 2. User invokes Invoke-PuppetGenerator
 3. User converts returned PSObject to Puppet manifests
 
-The plan of record is to discover and model the following 4 types of resources:
+The plan of record is to discover and model the following types of resources:
 
 - Groups
 - Windows Features
 - Environment variables
-- (Services)
-- (Chocolatey)
+- Services
+- Chocolatey Packages
 - Local Group Policy
 - Users
+- IIS Configuration
 
 ## Background
 
@@ -44,9 +45,41 @@ https://docs.google.com/document/d/1ix4fwg3yi2z4BUV5EQ2wPhVyeiyZMm2VoCJIxwRZpC0/
 
 ## Installation Instructions
 
+This will execute the generator on your local computer and output the results to `output\json` and `output\manifest`
+
 ~~~
 [PS] > git clone https://github.com/puppetlabs/PuppetManifestGenerator
 [PS] > cd PuppetManifestGenerator
 [PS] > Import-Module ./PuppetManifestGenerator.psm1 -Force -Verbose
 [PS] > Invoke-PuppetGenerator -Verbose
 ~~~
+
+You can use `Get-Help` for detailed information
+
+### Common Parameters
+
+#### ComputerName
+
+Array of computer names to query e.g.
+~~~
+Invoke-PuppetGenerator -ComputerName 'host-01','host-02','host-03'-Verbose
+~~~
+~~~
+'host-01','host-02','host-03' | Invoke-PuppetGenerator  -Verbose
+~~~
+
+#### OutputPath
+
+Folder where to output the results to.  The default is the `<module root>\output`
+~~~
+Invoke-PuppetGenerator -Output "$($ENV:UserProfile)\PMG\Output" -Verbose
+~~~
+
+
+## Packaging Instructions
+
+Note - Requires chocolatey (choco.exe) be in the search path
+
+From a command prompt or Powershell console window run `packaging\build.bat`
+
+This will create a chocolatey package in `packaging\output`
