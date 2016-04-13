@@ -28,10 +28,15 @@ VERBOSE: [localhost] Parsing windowsfeatures info to Puppet manifest
 #>
   [CmdletBinding()]
   param(
+    [Parameter(Mandatory=$false, ValueFromPipeline=$true)]
     [string[]]$ComputerName = 'localhost',
+
     [AllowNull()]
     [PSCredential]$Credential = $null,
+
     [string]$ModulePath = (Join-Path $PSScriptRoot "resources"),
+
+    [Alias('Output','Out')]
     [string]$OutPutPath = (Join-Path $PSScriptRoot "output")
   )
 
