@@ -5,11 +5,7 @@ Function ConvertTo-ManifestMotd {
     [string]$JSONString
   )
   
-  #  {
-  #       "Name":  "TEMP",
-  #       "Type":  "ExpandString",
-  #       "Value":  "%SystemRoot%\\TEMP"
-  #   }
+ 
 
   Process {
     $manifest = @"
