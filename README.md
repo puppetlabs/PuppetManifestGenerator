@@ -22,6 +22,7 @@ The plan of record is to discover and model the following types of resources:
 - Local Group Policy
 - Users
 - IIS Configuration
+- Message of the Day (MOTD)
 
 ## Background
 
