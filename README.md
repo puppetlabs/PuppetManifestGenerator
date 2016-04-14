@@ -48,7 +48,7 @@ https://docs.google.com/document/d/1ix4fwg3yi2z4BUV5EQ2wPhVyeiyZMm2VoCJIxwRZpC0/
 
 This will execute the generator on your local computer and output the results to `output\json` and `output\manifest`
 
-~~~
+~~~ powershell
 [PS] > git clone https://github.com/puppetlabs/PuppetManifestGenerator
 [PS] > cd PuppetManifestGenerator
 [PS] > Import-Module ./PuppetManifestGenerator.psm1 -Force -Verbose
@@ -57,7 +57,25 @@ This will execute the generator on your local computer and output the results to
 
 You can use `Get-Help` for detailed information
 
-### Common Parameters
+### Starting the GUI
+There is a very simple GUI that can be used to import a CSV file and then run the generator
+~~~ powershell
+[PS] > Invoke-PuppetGeneratorGUI -Verbose
+~~~
+
+With a CSV file
+~~~ powershell
+[PS] > Invoke-PuppetGeneratorGUI -CSVFile 'C:\computers.csv' -Verbose
+~~~
+
+Example CSV file
+~~~ csv
+computer,username,password
+host-01,user1,pwd1
+host-02,user2,pwd2
+~~~
+
+### Invoke-PuppetGenerator Common Parameters
 
 #### ComputerName
 
