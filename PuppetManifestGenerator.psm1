@@ -1,31 +1,31 @@
 Function Invoke-PuppetGenerator
 {
-<#
-.EXAMPLE
-PS> Invoke-PuppetGenerator -Verbose
-VERBOSE: Creating connections to target nodes
-VERBOSE: Adding modules to discover
-VERBOSE: Executing chocolatey on target nodes
-VERBOSE: Executing environment on target nodes
-VERBOSE: [localhost] Exporting environment info to json
-WARNING: [localhost] Failed to convert data in environment to JSON
-VERBOSE: Executing groups on target nodes
-VERBOSE: [localhost] Exporting groups info to json
-VERBOSE: [localhost] Parsing groups info to Puppet manifest
-VERBOSE: Executing iis on target nodes
-VERBOSE: Executing localgrouppolicy on target nodes
-VERBOSE: [localhost] Exporting localgrouppolicy info to json
-VERBOSE: [localhost] Parsing localgrouppolicy info to Puppet manifest
-VERBOSE: Executing services on target nodes
-VERBOSE: [localhost] Exporting services info to json
-VERBOSE: [localhost] Parsing services info to Puppet manifest
-VERBOSE: Executing users on target nodes
-VERBOSE: [localhost] Exporting users info to json
-VERBOSE: [localhost] Parsing users info to Puppet manifest
-VERBOSE: Executing windowsfeatures on target nodes
-VERBOSE: [localhost] Exporting windowsfeatures info to json
-VERBOSE: [localhost] Parsing windowsfeatures info to Puppet manifest
-#>
+  <#
+  .EXAMPLE
+  PS> Invoke-PuppetGenerator -Verbose
+  VERBOSE: Creating connections to target nodes
+  VERBOSE: Adding modules to discover
+  VERBOSE: Executing chocolatey on target nodes
+  VERBOSE: Executing environment on target nodes
+  VERBOSE: [localhost] Exporting environment info to json
+  WARNING: [localhost] Failed to convert data in environment to JSON
+  VERBOSE: Executing groups on target nodes
+  VERBOSE: [localhost] Exporting groups info to json
+  VERBOSE: [localhost] Parsing groups info to Puppet manifest
+  VERBOSE: Executing iis on target nodes
+  VERBOSE: Executing localgrouppolicy on target nodes
+  VERBOSE: [localhost] Exporting localgrouppolicy info to json
+  VERBOSE: [localhost] Parsing localgrouppolicy info to Puppet manifest
+  VERBOSE: Executing services on target nodes
+  VERBOSE: [localhost] Exporting services info to json
+  VERBOSE: [localhost] Parsing services info to Puppet manifest
+  VERBOSE: Executing users on target nodes
+  VERBOSE: [localhost] Exporting users info to json
+  VERBOSE: [localhost] Parsing users info to Puppet manifest
+  VERBOSE: Executing windowsfeatures on target nodes
+  VERBOSE: [localhost] Exporting windowsfeatures info to json
+  VERBOSE: [localhost] Parsing windowsfeatures info to Puppet manifest
+  #>
   [CmdletBinding()]
   param(
     [Parameter(Mandatory=$false, ValueFromPipeline=$true)]
@@ -186,7 +186,7 @@ Add-Type -assemblyName PresentationFramework
 Add-Type -assemblyName PresentationCore
 Add-Type -assemblyName WindowsBase
 Write-Verbose 'Loading Windows Forms assemblies'
-Add-Type -AssemblyName System.Windows.Forms    
+Add-Type -AssemblyName System.Windows.Forms
 
 function Get-WPFControl {
   [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
@@ -196,7 +196,7 @@ function Get-WPFControl {
 
     ,[Parameter(Mandatory=$true,ValueFromPipeline=$false)]
     [System.Windows.Window]$Window
-  )  
+  )
   Process {
     Write-Output $Window.FindName($ControlName)
   }
@@ -207,15 +207,15 @@ function Invoke-PuppetGeneratorGUI {
   param (
     [String]$CSVFile = ''
   )
-  
+
   Begin {
   }
-  
+
   Process {
     # Load XAML from the external file
     Write-Verbose "Loading the window XAML..."
     [xml]$xaml = (Get-Content (Join-Path -Path $PSScriptRoot -ChildPath 'PuppetManifestGenerator.xaml'))
-    
+
     # Build the GUI
     Write-Verbose "Parsing the window XAML..."
     $reader = (New-Object System.Xml.XmlNodeReader $xaml)
@@ -224,19 +224,19 @@ function Invoke-PuppetGeneratorGUI {
     # Wire up the XAML
     Write-Verbose "Adding XAML event handlers..."
     (Get-WPFControl 'btnShowIt' -Window $thisWindow).Add_Click({
-      $outputPath = (Get-WPFControl 'txtOutputPath' -Window $thisWindow).Text  
+      $outputPath = (Get-WPFControl 'txtOutputPath' -Window $thisWindow).Text
 
-      & explorer.exe $outputPath    
+      & explorer.exe $outputPath
     })
     (Get-WPFControl 'btnDoIt' -Window $thisWindow).Add_Click({
-      $outputPath = (Get-WPFControl 'txtOutputPath' -Window $thisWindow).Text      
+      $outputPath = (Get-WPFControl 'txtOutputPath' -Window $thisWindow).Text
 
       # Convert the dataset back into XML DOM Document
       $sw = New-Object -Type System.IO.StringWriter
       $dataSet.Tables[0].WriteXml($sw);
       $result = $sw.ToString()
       [xml]$targets = $result
-      
+
       # Disable the window UI..
       (Get-WPFControl 'gridMain' -Window $thisWindow).IsEnabled = $false
       (Get-WPFControl 'windowMain' -Window $thisWindow).Cursor = "Wait"
@@ -249,7 +249,7 @@ function Invoke-PuppetGeneratorGUI {
         } else {
           $cred = $null
         }
-        
+
         Invoke-PuppetGenerator -ComputerName ($_.computer) -Credential $cred -OutputPath $outputPath
       }
 
@@ -258,7 +258,7 @@ function Invoke-PuppetGeneratorGUI {
       (Get-WPFControl 'windowMain' -Window $thisWindow).Cursor = $null
       Write-Verbose "Generation completed"
     })
-    
+
     # Create XML file information
     if ($CSVFile -ne '') {
       [xml]$xmlTargets = ('<targets xmlns="" />')
@@ -274,26 +274,25 @@ function Invoke-PuppetGeneratorGUI {
     }
 
     # Convert XML into a two-way DataSet -> Table and databind it to the DataGrid
-    $reader = (New-Object System.Xml.XmlNodeReader $xmlTargets)    
+    $reader = (New-Object System.Xml.XmlNodeReader $xmlTargets)
     $dataSet = New-Object -TypeName System.Data.DataSet
-    $dataSet.ReadXml($reader) | Out-Null    
+    $dataSet.ReadXml($reader) | Out-Null
     (Get-WPFControl 'dataGrid' -Window $thisWindow).DataContext = $dataSet.Tables[0].DefaultView
 
     # Set the default output dir
     (Get-WPFControl 'txtOutputPath' -Window $thisWindow).Text = [Environment]::GetFolderPath('MyDocuments') + '\Puppet Manifest Generator'
-    
+
     # Show the GUI
     Write-Verbose "Showing the window..."
     [void]($thisWindow.ShowDialog())
     Write-Verbose "Cleanup..."
     $thisWindow.Close()
-    $thisWindow = $null    
+    $thisWindow = $null
   }
-  
+
   End {
   }
 }
 ##### END UI Functions
 
-Export-ModuleMember -Function Invoke-PuppetGenerator
-Export-ModuleMember -Function Invoke-PuppetGeneratorGUI
+Export-ModuleMember -Function "Invoke-*"
