@@ -31,7 +31,7 @@ class {'chocolatey':
 package { '$($_.Name)':
   ensure   => 'installed',
   #ensure  => 'latest',
-  #ensure  => '$_.Version',
+  #ensure  => '$($_.Version)',
   provider => 'chocolatey',
 }
 "@

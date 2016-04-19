@@ -1,0 +1,40 @@
+<Window x:Name="windowMain"
+        x:Class="System.Windows.Window"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:pmgapp"
+        Title="Puppet Manifest Generator" Height="350" Width="525">
+  <Grid x:Name="gridMain">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="30"/>
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <DockPanel Grid.Row="0" Grid.Column="0" Height="30">
+      <DockPanel.Background>
+        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
+      </DockPanel.Background>
+      <TextBox Width="400" x:Name="txtOutputPath" Padding="2" Margin="2"/>
+      <Button Content="Open" Padding="2" Margin="2" ToolTip="Open explorer to the output path" x:Name="btnShowIt"/>
+      <Button Content="Do it!" HorizontalAlignment="Right" Padding="2" Margin="2" x:Name="btnDoIt" />
+    </DockPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="0">
+      <DataGrid x:Name="dataGrid" CanUserReorderColumns="False" ItemsSource="{Binding}" CanUserResizeRows="False" ColumnWidth="150" AutoGenerateColumns="False">
+        <DataGrid.Background>
+          <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlColorKey}}"/>
+        </DataGrid.Background>
+        <DataGrid.AlternatingRowBackground>
+          <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.InactiveBorderColorKey}}"/>
+        </DataGrid.AlternatingRowBackground>
+        <DataGrid.Columns>
+          <DataGridTextColumn Binding="{Binding computer}" Header="Computer Name" />
+          <DataGridTextColumn Binding="{Binding username}" Header="Username"/>
+          <DataGridTextColumn Binding="{Binding password}" Header="Password"/>
+        </DataGrid.Columns>
+      </DataGrid>
+    </ScrollViewer>
+  </Grid>
+</Window>
