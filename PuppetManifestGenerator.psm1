@@ -29,6 +29,7 @@ Function Invoke-PuppetGenerator
   [CmdletBinding()]
   param(
     [Parameter(Mandatory=$false, ValueFromPipeline=$true)]
+    [Alias('Computer')]
     [string[]]$ComputerName = 'localhost',
 
     [AllowNull()]
@@ -56,8 +57,10 @@ Function Invoke-PuppetGenerator
   $connectionInfo.ErrorAction = 'SilentlyContinue'
   $connectionInfo.ErrorVariable = '+connectionErrors'
 
+  # Watch out for Trusted Host Issue
+  # Set-Item wsman:\localhost\Client\TrustedHosts -value *
   $sessions = New-PSSession @connectionInfo
-  
+
   if ($sessions.Count -eq 0) {
     Write-Verbose "Could not connect to any target modes"
     Write-Output "Manifests are located at '$manifestFilePath'"
