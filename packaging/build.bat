@@ -29,7 +29,7 @@ REM Chocolatey install and uninstall files
 Copy "%ThisDir%\chocolatey*.ps1" "%WorkDir%\tools" > NUL
 
 REM Powershell module
-COPY "%RootDir%\PuppetManifestGenerator.*" "%WorkDir%\tools\module" > NUL
+COPY "%RootDir%\PuppetManifestGenerator*.*" "%WorkDir%\tools\module" > NUL
 XCOPY "%RootDir%\resources" "%WorkDir%\tools\module\resources" /s /e /c /i /v /y > NUL
 
 
