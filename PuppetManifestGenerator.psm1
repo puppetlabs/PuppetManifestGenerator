@@ -38,22 +38,27 @@ Function Invoke-PuppetGenerator
     [string]$ModulePath = (Join-Path $PSScriptRoot "resources"),
 
     [Alias('Output','Out')]
-    [string]$OutPutPath = (Join-Path $PSScriptRoot "output")
+    [string]$OutPutPath = (Join-Path $PSScriptRoot "output"),
+
+    [switch]$DoNotCleanOutput = $false
   )
 
   $jsonFilePath = Join-Path $OutPutPath "json"
   $manifestFilePath = Join-Path $OutPutPath "manifest"
 
+  if (-not $DoNotCleanOutput) {
+    if (Test-Path($jsonFilePath)) { Remove-Item $jsonFilePath -Force -Recurse -EA SilentlyContinue | Out-Null }
+    if (Test-Path($manifestFilePath)) { Remove-Item $manifestFilePath -Force -Recurse -EA SilentlyContinue | Out-Null }
+  }
   if(-not(Test-path $OutPutPath)){ mkdir $OutPutPath }
-  if (Test-Path($jsonFilePath)) { Remove-Item $jsonFilePath -Force -Recurse -EA SilentlyContinue | Out-Null }
   if(-not(Test-path $jsonFilePath)){ mkdir $jsonFilePath | Out-Null }
-  if (Test-Path($manifestFilePath)) { Remove-Item $manifestFilePath -Force -Recurse -EA SilentlyContinue | Out-Null }
   if(-not(Test-path $manifestFilePath)){ mkdir $manifestFilePath | Out-Null }
 
   Write-Verbose "Creating connections to target nodes"
   $connectionInfo = $PSBoundParameters
   $connectionInfo.Remove('ModulePath') | Out-Null
   $connectionInfo.Remove('OutPutPath') | Out-Null
+  $connectionInfo.Remove('DoNotCleanOutput') | Out-Null
   $connectionInfo.ErrorAction = 'SilentlyContinue'
   $connectionInfo.ErrorVariable = '+connectionErrors'
 
