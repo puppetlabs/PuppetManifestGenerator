@@ -73,7 +73,7 @@ function Invoke-PuppetGeneratorGUI {
           $cred = $null
         }
 
-        Invoke-PuppetGenerator -ComputerName $targetList -Credential $cred -OutputPath $outputPath
+        Invoke-PuppetGenerator -ComputerName $targetList -Credential $cred -OutputPath $outputPath -Verbose:$VerbosePreference
       }
 
       # Enable the window UI..

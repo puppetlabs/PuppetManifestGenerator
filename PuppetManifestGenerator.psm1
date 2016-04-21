@@ -56,8 +56,18 @@ Function Invoke-PuppetGenerator
   $connectionInfo.ErrorAction = 'SilentlyContinue'
   $connectionInfo.ErrorVariable = '+connectionErrors'
 
-  # TODO: Write our computers not connected to
   $sessions = New-PSSession @connectionInfo
+  
+  if ($sessions.Count -eq 0) {
+    Write-Verbose "Could not connect to any target modes"
+    Write-Output "Manifests are located at '$manifestFilePath'"
+    return
+  }
+  
+  # Verbose output
+  $sessions | % { 
+    Write-Verbose "Connected to [$($_.ComputerName)]"
+  }
 
   Write-Verbose "Adding modules to discover"
   Get-ChildItem -Path $ModulePath -Directory | % {
