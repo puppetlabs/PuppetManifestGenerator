@@ -61,6 +61,7 @@ function Invoke-PuppetGeneratorGUI {
       (Get-WPFControl 'windowMain' -Window $thisWindow).Cursor = "Wait"
 
       Write-Verbose "Starting the generation..."
+      $SuppressClean = $false
       $targets.SelectNodes("/targets/target") | Group-Object -Property { "$($_.username)`0$($_.password)" } | % {
         $username = ($_.Name -split "`0")[0].Trim()
         $password = ($_.Name -split "`0")[1].Trim()
@@ -73,7 +74,8 @@ function Invoke-PuppetGeneratorGUI {
           $cred = $null
         }
 
-        Invoke-PuppetGenerator -ComputerName $targetList -Credential $cred -OutputPath $outputPath -Verbose:$VerbosePreference
+        Invoke-PuppetGenerator -ComputerName $targetList -Credential $cred -OutputPath $outputPath -Verbose:$VerbosePreference -DoNotCleanOutput:$SuppressClean
+        $SuppressClean = $true
       }
 
       # Enable the window UI..
