@@ -9,11 +9,9 @@ try {
   }
   else
   {
-    Write-Debug "Installation directory doesn't exist"
+    Write-Verbose "Installation directory doesn't exist"
   }
 
-  Write-ChocolateySuccess "$packageName"
 } catch {
-  Write-ChocolateyFailure "$packageName" "$($_.Exception.Message)"
-  throw 
+  throw $_
 }
