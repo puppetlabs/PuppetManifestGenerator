@@ -1,10 +1,18 @@
 # Puppet Manifest Generator for Windows
 
+## Disclaimer
+
+* This project was created out of a HackDay from the Windows team and is not a supported or actively maintained project by Puppet
+
+* While all care has been given, this project could destroy the known universe. Use at your own risk!
+
+Please read the [Disclaimer](DISCLAIMER.MD)
+
+## Overview
+
 A Blueprint style powershell module for Puppet - Windows Hackday 2016
 
 ![Image of Puppet Manifest Generator](https://github.com/puppetlabs/PuppetManifestGenerator/blob/master/img/enterprise.png)
-
-## Overview
 
 The goal of the project is to show proof of concept for discovering what can be managed on a user's Windows machine. We will demonstrate the following workflow:
 
@@ -80,18 +88,18 @@ host-02,user2,pwd2
 #### ComputerName
 
 Array of computer names to query e.g.
+~~~ powershell
+[PS] > Invoke-PuppetGenerator -ComputerName 'host-01','host-02','host-03'-Verbose
 ~~~
-Invoke-PuppetGenerator -ComputerName 'host-01','host-02','host-03'-Verbose
-~~~
-~~~
-'host-01','host-02','host-03' | Invoke-PuppetGenerator  -Verbose
+~~~ powershell
+[PS] > 'host-01','host-02','host-03' | Invoke-PuppetGenerator  -Verbose
 ~~~
 
 #### OutputPath
 
 Folder where to output the results to.  The default is the `<module root>\output`
-~~~
-Invoke-PuppetGenerator -Output "$($ENV:UserProfile)\PMG\Output" -Verbose
+~~~ powershell
+[PS] > Invoke-PuppetGenerator -Output "$($ENV:UserProfile)\PMG\Output" -Verbose
 ~~~
 
 
