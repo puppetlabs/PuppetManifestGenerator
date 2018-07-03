@@ -33,7 +33,7 @@ Function ConvertTo-ManifestLocalGroupPolicy {
 #     key   => '$($_.Keyname)',
 #     value => '$($_.ValueName)',
 #     data  => '$($_.value)',
-#     type  => '$($_.value)',
+#     type  => '$($_.ValueType)',
 #     notify => Windows_group_policy::Gpupdate['GPUpdate'],
 # }
 "@
