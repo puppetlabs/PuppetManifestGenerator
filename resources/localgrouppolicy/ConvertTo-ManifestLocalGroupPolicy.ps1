@@ -27,7 +27,7 @@ Function ConvertTo-ManifestLocalGroupPolicy {
     $numPolicy = 1
         $objTree | % {
             # TODO Should change the data if it's a binary or number instead of always being a string.  Not sure if necessary
-            If($($_.ValueType) -match "*SZ*"){$type='string'}Else{$type='dword'}
+            If($($_.ValueType) -match "REG_SZ"){$type='string'}Else{$type='dword'}
             If ($($_.PolicyContext.ToLower()) -match "machine") {
                 $thisManifest = @"
 
@@ -35,21 +35,19 @@ Function ConvertTo-ManifestLocalGroupPolicy {
 #     key   => 'HKLM\$($_.Keyname)',
 #     value => '$($_.ValueName)',
 #     data  => '$($_.value)',
-#     type  => '$($_.ValueType)',
-#     notify => Windows_group_policy::Gpupdate['GPUpdate'],
+#     type  => '$($type)',
 # }
 "@
             }
             Else {
-                $userkey = ('HKU' + $($_.Keyname)).Replace('\', '\\')
+                $userkey = ('HKU\' + $($_.Keyname)).Replace('\', '\\')
                 $thisManifest = @"
 
 # registry::value { 'LocalGPO-$($numPolicy)':
 #     key   => '$userkey',
 #     value => '$($_.ValueName)',
 #     data  => '$($_.value)',
-#     type  => '$($_.ValueType)',
-#     notify => Windows_group_policy::Gpupdate['GPUpdate'],
+#     type  => '$($type)',
 # }
 "@
             }
