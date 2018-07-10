@@ -4,7 +4,7 @@ Function ConvertTo-ManifestLocalGroupPolicy {
     [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
     [string]$JSONString
   )
-  
+
 # Name
 # DisplayName
 # Description
@@ -20,27 +20,43 @@ Function ConvertTo-ManifestLocalGroupPolicy {
 # GPUpdate is called whenever local group policy is updated
 # windows_group_policy::gpupdate { 'GPUpdate':
 # }
-  
+
 "@
     $objTree = ConvertFrom-Json -InputObject $JSONString
-    
-    $numPolicy = 1
-    $objTree | % {
-      # TODO Should change the data if it's a binary or number instead of always being a string.  Not sure if necessary
-      $thisManifest = @"
 
-# windows_group_policy::local::$($_.PolicyContext.ToLower()) { 'LocalGPO-$($numPolicy)':
-#     key   => '$($_.Keyname)',
+    $numPolicy = 1
+        $objTree | % {
+            # TODO Should change the data if it's a binary or number instead of always being a string.  Not sure if necessary
+            If($($_.ValueType) -match "*SZ*"){$type='string'}Else{$type='dword'}
+            If ($($_.PolicyContext.ToLower()) -match "machine") {
+                $thisManifest = @"
+
+# registry::value { 'LocalGPO-$($numPolicy)':
+#     key   => 'HKLM\$($_.Keyname)',
 #     value => '$($_.ValueName)',
 #     data  => '$($_.value)',
 #     type  => '$($_.ValueType)',
 #     notify => Windows_group_policy::Gpupdate['GPUpdate'],
 # }
 "@
-      $manifest += "$thisManifest`n"
-      $numPolicy++
-    }
-    
+            }
+            Else {
+                $userkey = ('HKU' + $($_.Keyname)).Replace('\', '\\')
+                $thisManifest = @"
+
+# registry::value { 'LocalGPO-$($numPolicy)':
+#     key   => '$userkey',
+#     value => '$($_.ValueName)',
+#     data  => '$($_.value)',
+#     type  => '$($_.ValueType)',
+#     notify => Windows_group_policy::Gpupdate['GPUpdate'],
+# }
+"@
+            }
+            $manifest += "$thisManifest`n"
+            $numPolicy++
+        }
+
     Write-Output $manifest
   }
 }
