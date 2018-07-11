@@ -12,6 +12,7 @@ Function ConvertTo-ManifestLocalGroupPolicy {
   Process {
         $manifest = @"
 # Module code is at https://github.com/puppetlabs/puppetlabs-registry
+# Requires RegUser.rb and UserSids.rb to do user code portion (and turn it into a loop)
 
 # Search Group Policies and find their registry information
 # http://gpsearch.azurewebsites.net/
@@ -35,7 +36,7 @@ Function ConvertTo-ManifestLocalGroupPolicy {
 "@
             }
             Else {
-                $userkey = ('HKU\' + $($_.Keyname)).Replace('\', '\\')
+                $userkey = ('HKU\${sids}\' + $($_.Keyname)).Replace('\', '\\')
                 $thisManifest = @"
 
 # registry::value { 'LocalGPO-$($numPolicy)':
