@@ -32,7 +32,7 @@ each (`$user_sid) |`$sidder| {
             If ($($_.PolicyContext.ToLower()) -match "machine") {
                 $thisManifest = @"
 
- registry::value { 'LocalGPO-$($numPolicy)':
+ registry::value { 'Machine-LocalGPO-$($numPolicy)':
      key   => 'HKLM\$($_.Keyname)',
      value => '$($_.ValueName)',
      data  => '$($_.value)',
@@ -44,7 +44,7 @@ each (`$user_sid) |`$sidder| {
                 $userkey = ('HKU\${sids}\' + $($_.Keyname)).Replace('\', '\\')
                 $thisManifest = @"
 
- registry::value { 'LocalGPO-$($numPolicy)':
+ registry::value { 'User-LocalGPO-$($numPolicy)':
      key   => '$userkey',
      value => '$($_.ValueName)',
      data  => '$($_.value)',
