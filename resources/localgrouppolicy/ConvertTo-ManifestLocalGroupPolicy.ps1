@@ -1,4 +1,4 @@
-Function ConvertTo-ManifestLocalGroupPolicy {
+Function ConvertTo-ManifestLocalGroupPolicy{
   [cmdletBinding(SupportsShouldProcess=$false,ConfirmImpact='Low')]
   param(
     [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
@@ -23,7 +23,8 @@ each (`$user_sid) |`$sidder| {
 
  Search Group Policies and find their registry information
  http://gpsearch.azurewebsites.net/
-*/"@
+*/
+"@
     $objTree = ConvertFrom-Json -InputObject $JSONString
 
     $numPolicy = 1
@@ -31,7 +32,6 @@ each (`$user_sid) |`$sidder| {
             If($($_.ValueType) -match "REG_SZ"){$type='string'}Else{$type='dword'}
             If ($($_.PolicyContext.ToLower()) -match "machine") {
                 $thisManifest = @"
-
  registry::value { 'Machine-LocalGPO-$($numPolicy)':
      key   => 'HKLM\$($_.Keyname)',
      value => '$($_.ValueName)',
@@ -52,6 +52,7 @@ each (`$user_sid) |`$sidder| {
  }
 "@
             }
+
             $manifest += "$thisManifest`n"
             $numPolicy++
         }
